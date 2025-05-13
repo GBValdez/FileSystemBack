@@ -92,6 +92,8 @@ builder.Services.AddSwaggerGen(c =>
                         }
 
                     });
+                    c.OperationFilter<AddFileUploadOperation>();
+
                     c.EnableAnnotations();
                 }
             );

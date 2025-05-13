@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace project.users.dto
 {
-    public class clientCreationDto : clientDtoBase
+    public class clientCreationDto
     {
         public string? userName { get; set; }
+
         [Required(ErrorMessage = "El campo Contraseña es requerido")]
         public string? password { get; set; }
+
+        [Required(ErrorMessage = "El campo Correo es requerido")]
+        public string email { get; set; } = null!;
+
 
     }
 }

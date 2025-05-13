@@ -1,13 +1,12 @@
 using AutoMapper;
+using back.File.Dtos;
+using back.models;
 
 using project.roles;
 using project.roles.dto;
 using project.users;
 using project.users.dto;
 using project.users.Models;
-using project.utils.catalogue;
-using project.utils.catalogues.dto;
-using project.utils.Catalogues.dto;
 
 namespace project.utils.autoMapper
 {
@@ -24,10 +23,7 @@ namespace project.utils.autoMapper
             CreateMap<Client, clientDto>();
             CreateMap<clientCreationDto, Client>();
             CreateMap<clientCreationDto, userCreationDto>();
-            CreateMap<Catalogue, catalogueDto>();
-            CreateMap<catalogueCreationDto, Catalogue>();
-            CreateMap<catalogueTypeDtoCreation, catalogueType>();
-            CreateMap<catalogueType, catalogueTypeDtoCreation>();
+            CreateMap<Files, FileDto>();
 
         }
 
