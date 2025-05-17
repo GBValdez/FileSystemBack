@@ -10,9 +10,11 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using project.Models;
+using project.users;
 using project.utils;
 using project.utils.dto;
 
@@ -21,13 +23,15 @@ namespace back.File
     [ApiController]
     [Route("[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "ADMINISTRATOR")]
-    public class FileController : controllerCommons<Files, Files, FileDto, object, object, long>
+    public class FileController : controllerCommons<Files, Files, FileDto, FileQueryDto, object, long>
     {
         private string rutaBase = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        public FileController(DBProyContext context, IMapper mapper, IConfiguration configuration) : base(context, mapper)
+        private UserManager<userEntity> userManager;
+        public FileController(DBProyContext context, IMapper mapper, IConfiguration configuration, UserManager<userEntity> userManagerTemp) : base(context, mapper)
         {
             this.rutaBase = configuration["RutaBase"];
-            this.rutaBase = this.rutaBase.Replace("/", Path.DirectorySeparatorChar.ToString());
+            this.userManager = userManagerTemp;
+            // this.rutaBase = this.rutaBase.Replace("/", Path.DirectorySeparatorChar.ToString());
 
         }
         public override async Task<ActionResult<FileDto>> post(Files newRegister, [FromQuery] object queryParams)
@@ -44,9 +48,23 @@ namespace back.File
             return BadRequest("No implementado");
         }
 
-        protected override async Task<IQueryable<Files>> modifyGet(IQueryable<Files> query, object queryParams)
+        protected override async Task<IQueryable<Files>> modifyGet(IQueryable<Files> query, FileQueryDto queryParams)
         {
             query = query.Include(x => x.userUpdate);
+            if (queryParams.dateFrom != null && queryParams.dateTo != null)
+            {
+                query = query.Where(x => x.createAt >= queryParams.dateFrom && x.createAt <= queryParams.dateTo);
+            }
+            if (queryParams.userName != null)
+            {
+                userEntity user = await userManager.FindByNameAsync(queryParams.userName);
+                if (user == null)
+                {
+                    return query;
+                }
+                query = query.Where(x => x.userUpdateId == user.Id);
+            }
+
             return query;
         }
         [HttpPost("upload")]
