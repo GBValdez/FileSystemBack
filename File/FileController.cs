@@ -97,11 +97,41 @@ namespace back.File
                 {
                     return BadRequest(new errorMessageDto("El Pdf no tiene páginas"));
                 }
+
+                bool haveContent = false;
                 for (int i = 1; i <= totalPages; i++)
                 {
                     var page = pdfDoc.GetPage(i);
                     var content = PdfTextExtractor.GetTextFromPage(page);
-                    if (!string.IsNullOrWhiteSpace(content)) continue;
+
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        haveContent = true;
+                        break;
+                    }
+
+                    var resources = page.GetResources();
+                    var xObjectNames = resources.GetResourceNames();
+
+                    bool hasImage = false;
+                    foreach (var name in xObjectNames)
+                    {
+                        string image = name.GetValue().ToLower();
+                        if (image.Contains("image"))
+                        {
+                            hasImage = true;
+                        }
+                    }
+
+                    if (hasImage)
+                    {
+                        haveContent = true;
+                        break;
+                    }
+
+                }
+                if (!haveContent)
+                {
                     return BadRequest(new errorMessageDto("El Pdf no tiene contenido"));
                 }
 
